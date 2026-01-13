@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Search, BarChart3, DollarSign, FileSearch } from 'lucide-react'
+import { LayoutDashboard, Search, BarChart3, DollarSign, FileSearch, X } from 'lucide-react'
 
-export default function ClientSidebar({ basePath, clientId }) {
+export default function ClientSidebar({ basePath, clientId, onClose }) {
   const menuItems = [
     { path: `${basePath}/${clientId}/overview`, label: 'Overview', icon: LayoutDashboard },
     { path: `${basePath}/${clientId}/seo-audit`, label: 'SEO Audit', icon: Search },
@@ -17,8 +17,17 @@ export default function ClientSidebar({ basePath, clientId }) {
   // For now, we'll show all items but they'll show connection prompts if not connected
 
   return (
-    <div className="w-64 bg-white dark:bg-[#1f1f1f] border-r border-gray-200 dark:border-gray-800 flex flex-col transition-colors">
-      <nav className="flex-1 p-4 space-y-2">
+    <div className="w-full h-full bg-[#1f1f1f] flex flex-col">
+      <div className="lg:hidden p-4 border-b border-gray-800 flex items-center justify-between">
+        <span className="text-white font-semibold">Menu</span>
+        <button
+          onClick={onClose}
+          className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+      <nav className="flex-1 p-3 sm:p-4 space-y-2">
         {menuItems.map((item) => {
           const Icon = item.icon
           return (
@@ -29,7 +38,7 @@ export default function ClientSidebar({ basePath, clientId }) {
                 `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                   isActive
                     ? 'bg-primary-orange text-white'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
+                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                 }`
               }
             >
@@ -48,7 +57,7 @@ export default function ClientSidebar({ basePath, clientId }) {
                 `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                   isActive
                     ? 'bg-primary-orange text-white'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
+                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                 }`
               }
             >

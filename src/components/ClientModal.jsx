@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react'
 import { useData } from '../contexts/DataContext'
-import { X } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import { X, User } from 'lucide-react'
 
 export default function ClientModal({ client, onClose }) {
-  const { addClient, updateClient } = useData()
+  const { addClient, updateClient, managers } = useData()
+  const { user } = useAuth()
+  const isAdmin = user?.role === 'admin'
   const [formData, setFormData] = useState({
     name: '',
     website: '',
     status: 'active',
+    managerId: '',
   })
 
   useEffect(() => {
@@ -16,16 +20,26 @@ export default function ClientModal({ client, onClose }) {
         name: client.name || '',
         website: client.website || '',
         status: client.status || 'active',
+        managerId: client.managerId || '',
       })
     }
   }, [client])
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    const submitData = {
+      ...formData,
+      managerId: isAdmin 
+        ? (formData.managerId ? parseInt(formData.managerId) : null)
+        : (client?.managerId || user?.id), // For managers, keep existing managerId or use their own ID
+    }
     if (client) {
-      updateClient(client.id, formData)
+      updateClient(client.id, submitData)
     } else {
-      addClient(formData)
+      // Managers can't create new clients, only admins can
+      if (isAdmin) {
+        addClient(submitData)
+      }
     }
     onClose()
   }
@@ -73,6 +87,33 @@ export default function ClientModal({ client, onClose }) {
             />
           </div>
 
+          {isAdmin && (
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Account Manager {!client && <span className="text-red-400">*</span>}
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <select
+                  value={formData.managerId}
+                  onChange={(e) => setFormData({ ...formData, managerId: e.target.value })}
+                  required={!client && isAdmin}
+                  className="w-full pl-10 pr-4 py-2 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-orange focus:border-transparent"
+                >
+                  <option value="">Select Account Manager</option>
+                  {managers.map((manager) => (
+                    <option key={manager.id} value={manager.id}>
+                      {manager.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {!client && managers.length === 0 && (
+                <p className="text-xs text-yellow-400 mt-1">No account managers available. Please add one first.</p>
+              )}
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Status
@@ -107,4 +148,5 @@ export default function ClientModal({ client, onClose }) {
     </div>
   )
 }
+
 

@@ -1,13 +1,17 @@
 import { useState } from 'react'
 import { useData } from '../../contexts/DataContext'
 import { useAuth } from '../../contexts/AuthContext'
-import { Link } from 'react-router-dom'
-import { Search, ExternalLink, AlertCircle, CheckCircle, XCircle } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Search, Eye, Edit, AlertCircle, CheckCircle, XCircle } from 'lucide-react'
+import ClientModal from '../../components/ClientModal'
 
 export default function ManagerClientList() {
   const { getClientsForUser } = useData()
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const [showModal, setShowModal] = useState(false)
+  const [editingClient, setEditingClient] = useState(null)
 
   const clients = getClientsForUser()
   const filteredClients = clients.filter((client) =>
@@ -31,11 +35,20 @@ export default function ManagerClientList() {
     }
   }
 
+  const handleView = (clientId) => {
+    navigate(`/manager/clients/${clientId}`)
+  }
+
+  const handleEdit = (client) => {
+    setEditingClient(client)
+    setShowModal(true)
+  }
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">My Clients</h1>
-        <p className="text-gray-400">Your assigned clients</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">My Clients</h1>
+        <p className="text-gray-400 text-sm sm:text-base">Your assigned clients</p>
       </div>
 
       {/* Search */}
@@ -54,36 +67,37 @@ export default function ManagerClientList() {
 
       {/* Clients Table */}
       <div className="bg-[#2a2a2a] rounded-xl border border-gray-800 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="overflow-x-auto scrollbar-hide">
+          <table className="w-full min-w-[640px]">
             <thead className="bg-[#1a1a1a] border-b border-gray-800">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Client Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">SEO Score</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Connected Sources</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Status</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Actions</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Client Name</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">SEO Score</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-300 hidden md:table-cell">Connected Sources</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Status</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
               {filteredClients.length > 0 ? (
                 filteredClients.map((client) => (
-                  <tr key={client.id} className="hover:bg-[#1a1a1a] transition-colors">
-                    <td className="px-6 py-4">
-                      <Link
-                        to={`/manager/clients/${client.id}`}
-                        className="text-white font-medium hover:text-primary-orange transition-colors"
-                      >
+                  <tr 
+                    key={client.id} 
+                    className="hover:bg-[#1a1a1a] transition-colors cursor-pointer"
+                    onClick={() => navigate(`/manager/clients/${client.id}`)}
+                  >
+                    <td className="px-4 sm:px-6 py-3 sm:py-4">
+                      <span className="text-white font-medium text-sm sm:text-base hover:text-primary-orange transition-colors">
                         {client.name}
-                      </Link>
+                      </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`font-semibold ${getSeoScoreColor(client.seoScore)}`}>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4">
+                      <span className={`font-semibold text-sm sm:text-base ${getSeoScoreColor(client.seoScore)}`}>
                         {client.seoScore}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
+                      <div className="flex items-center gap-2 flex-wrap">
                         {client.sources?.analytics && (
                           <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">Analytics</span>
                         )}
@@ -98,19 +112,29 @@ export default function ManagerClientList() {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4">
                       <div className="flex items-center gap-2">
                         {getStatusIcon(client.status)}
-                        <span className="text-gray-300 capitalize">{client.status}</span>
+                        <span className="text-gray-300 capitalize text-sm sm:text-base">{client.status}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <Link
-                        to={`/manager/clients/${client.id}`}
-                        className="text-primary-orange hover:text-orange-400 transition-colors"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </Link>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <button
+                          onClick={() => handleView(client.id)}
+                          className="p-1.5 sm:p-2 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors"
+                          title="View"
+                        >
+                          <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleEdit(client)}
+                          className="p-1.5 sm:p-2 text-primary-orange hover:bg-primary-orange/20 rounded-lg transition-colors"
+                          title="Edit"
+                        >
+                          <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -125,7 +149,18 @@ export default function ManagerClientList() {
           </table>
         </div>
       </div>
+
+      {showModal && (
+        <ClientModal
+          client={editingClient}
+          onClose={() => {
+            setShowModal(false)
+            setEditingClient(null)
+          }}
+        />
+      )}
     </div>
   )
 }
+
 

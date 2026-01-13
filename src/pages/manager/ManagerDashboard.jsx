@@ -1,11 +1,12 @@
 import { useData } from '../../contexts/DataContext'
 import { useAuth } from '../../contexts/AuthContext'
+import { useNavigate, Link } from 'react-router-dom'
 import { TrendingUp, AlertTriangle, CheckCircle, BarChart3 } from 'lucide-react'
-import { Link } from 'react-router-dom'
 
 export default function ManagerDashboard() {
   const { clients } = useData()
   const { user } = useAuth()
+  const navigate = useNavigate()
 
   const myClients = clients.filter((c) => c.managerId === user?.id)
   const activeClients = myClients.filter((c) => c.status === 'active')
@@ -23,14 +24,14 @@ export default function ManagerDashboard() {
     .slice(0, 5)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Manager Dashboard</h1>
-        <p className="text-gray-400">Your clients overview</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Manager Dashboard</h1>
+        <p className="text-gray-400 text-sm sm:text-base">Your clients overview</p>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="bg-[#2a2a2a] rounded-xl p-6 border border-gray-800">
           <div className="flex items-center justify-between mb-4">
             <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
@@ -123,10 +124,10 @@ export default function ManagerDashboard() {
         {clientsNeedingAttention.length > 0 ? (
           <div className="space-y-3">
             {clientsNeedingAttention.map((client) => (
-              <Link
+              <button
                 key={client.id}
-                to={`/manager/clients/${client.id}`}
-                className="block bg-[#1a1a1a] rounded-lg p-4 hover:bg-gray-800 transition-colors"
+                onClick={() => navigate(`/manager/clients/${client.id}`)}
+                className="w-full text-left block bg-[#1a1a1a] rounded-lg p-4 hover:bg-gray-800 transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -135,7 +136,7 @@ export default function ManagerDashboard() {
                   </div>
                   <div className="text-red-400 font-semibold">Needs Attention</div>
                 </div>
-              </Link>
+              </button>
             ))}
           </div>
         ) : (
@@ -145,4 +146,5 @@ export default function ManagerDashboard() {
     </div>
   )
 }
+
 

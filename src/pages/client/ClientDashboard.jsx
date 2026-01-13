@@ -2,7 +2,6 @@ import { Routes, Route, useParams, Navigate } from 'react-router-dom'
 import { useData } from '../../contexts/DataContext'
 import { useAuth } from '../../contexts/AuthContext'
 import ClientHeader from '../../components/ClientHeader'
-import ClientSidebar from '../../components/ClientSidebar'
 import Overview from './Overview'
 import SEOAudit from './SEOAudit'
 import Analytics from './Analytics'
@@ -42,20 +41,19 @@ export default function ClientDashboard() {
   const basePath = user?.role === 'admin' ? '/admin/clients' : '/manager/clients'
 
   return (
-    <div className="flex flex-col h-full -m-6">
-      <ClientHeader client={client} />
-      <div className="flex flex-1 overflow-hidden">
-        <ClientSidebar basePath={basePath} clientId={clientId} />
-        <div className="flex-1 overflow-auto p-6">
-          <Routes>
-            <Route path="/" element={<Navigate to={`${basePath}/${clientId}/overview`} replace />} />
-            <Route path="overview" element={<Overview client={client} />} />
-            <Route path="seo-audit" element={<SEOAudit client={client} />} />
-            <Route path="analytics" element={<Analytics client={client} />} />
-            <Route path="ads" element={<Ads client={client} />} />
-            <Route path="search-console" element={<SearchConsole client={client} />} />
-          </Routes>
-        </div>
+    <div className="flex flex-col h-full w-full -m-4 sm:-m-6">
+      <div className="flex-shrink-0 -mx-4 sm:-mx-6">
+        <ClientHeader client={client} />
+      </div>
+      <div className="flex-1 overflow-y-auto scrollbar-hide bg-primary-dark">
+        <Routes>
+          <Route path="/" element={<Navigate to={`${basePath}/${clientId}/overview`} replace />} />
+          <Route path="overview" element={<Overview client={client} />} />
+          <Route path="seo-audit" element={<SEOAudit client={client} />} />
+          <Route path="analytics" element={<Analytics client={client} />} />
+          <Route path="ads" element={<Ads client={client} />} />
+          <Route path="search-console" element={<SearchConsole client={client} />} />
+        </Routes>
       </div>
     </div>
   )

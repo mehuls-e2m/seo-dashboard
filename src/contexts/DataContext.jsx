@@ -111,6 +111,14 @@ export function DataProvider({ children }) {
   }
 
   const deleteManager = (id) => {
+    // Unassign all clients from this manager
+    const updatedClients = clients.map((client) =>
+      client.managerId === id ? { ...client, managerId: null } : client
+    )
+    setClients(updatedClients)
+    localStorage.setItem('clients', JSON.stringify(updatedClients))
+    
+    // Delete the manager
     const updatedManagers = managers.filter((manager) => manager.id !== id)
     setManagers(updatedManagers)
     localStorage.setItem('managers', JSON.stringify(updatedManagers))

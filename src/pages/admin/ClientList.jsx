@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { useData } from '../../contexts/DataContext'
-import { Link } from 'react-router-dom'
-import { Plus, Search, ExternalLink, AlertCircle, CheckCircle, XCircle } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Plus, Search, Eye, Edit, Trash2, AlertCircle, CheckCircle, XCircle } from 'lucide-react'
 import ClientModal from '../../components/ClientModal'
 
 export default function ClientList() {
-  const { clients, managers, updateClient, deleteClient, assignClientToManager } = useData()
+  const { clients, managers, deleteClient } = useData()
+  const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [editingClient, setEditingClient] = useState(null)
+  const [deleteConfirm, setDeleteConfirm] = useState(null)
 
   const filteredClients = clients.filter((client) =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -31,16 +33,26 @@ export default function ClientList() {
     }
   }
 
-  const handleAssignManager = (clientId, managerId) => {
-    assignClientToManager(clientId, managerId || null)
+  const handleView = (clientId) => {
+    navigate(`/admin/clients/${clientId}`)
+  }
+
+  const handleEdit = (client) => {
+    setEditingClient(client)
+    setShowModal(true)
+  }
+
+  const handleDelete = (clientId) => {
+    deleteClient(clientId)
+    setDeleteConfirm(null)
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Clients</h1>
-          <p className="text-gray-400">Manage all agency clients</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Clients</h1>
+        <p className="text-gray-400 text-sm sm:text-base">Manage all agency clients</p>
         </div>
         <button
           onClick={() => {
@@ -70,16 +82,16 @@ export default function ClientList() {
 
       {/* Clients Table */}
       <div className="bg-[#2a2a2a] rounded-xl border border-gray-800 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="overflow-x-auto scrollbar-hide">
+          <table className="w-full min-w-[640px]">
             <thead className="bg-[#1a1a1a] border-b border-gray-800">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Client Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">SEO Score</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Connected Sources</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Manager</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Status</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Actions</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Client Name</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">SEO Score</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-300 hidden md:table-cell">Connected Sources</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-300 hidden lg:table-cell">Manager</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Status</th>
+                <th className="px-4 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
@@ -87,22 +99,28 @@ export default function ClientList() {
                 filteredClients.map((client) => {
                   const manager = managers.find((m) => m.id === client.managerId)
                   return (
-                    <tr key={client.id} className="hover:bg-[#1a1a1a] transition-colors">
-                      <td className="px-6 py-4">
-                        <Link
-                          to={`/admin/clients/${client.id}`}
-                          className="text-white font-medium hover:text-primary-orange transition-colors"
-                        >
+                    <tr 
+                      key={client.id} 
+                      className="hover:bg-[#1a1a1a] transition-colors cursor-pointer"
+                      onClick={(e) => {
+                        // Don't trigger if clicking on action buttons
+                        if (!e.target.closest('button')) {
+                          handleView(client.id)
+                        }
+                      }}
+                    >
+                      <td className="px-4 sm:px-6 py-3 sm:py-4">
+                        <span className="text-white font-medium text-sm sm:text-base hover:text-primary-orange transition-colors">
                           {client.name}
-                        </Link>
+                        </span>
                       </td>
-                      <td className="px-6 py-4">
-                        <span className={`font-semibold ${getSeoScoreColor(client.seoScore)}`}>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4">
+                        <span className={`font-semibold text-sm sm:text-base ${getSeoScoreColor(client.seoScore)}`}>
                           {client.seoScore}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
+                        <div className="flex items-center gap-2 flex-wrap">
                           {client.sources?.analytics && (
                             <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">Analytics</span>
                           )}
@@ -117,33 +135,41 @@ export default function ClientList() {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <select
-                          value={client.managerId || ''}
-                          onChange={(e) => handleAssignManager(client.id, e.target.value ? parseInt(e.target.value) : null)}
-                          className="bg-[#1a1a1a] border border-gray-700 rounded px-3 py-1 text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-orange"
-                        >
-                          <option value="">Unassigned</option>
-                          {managers.map((m) => (
-                            <option key={m.id} value={m.id}>
-                              {m.name}
-                            </option>
-                          ))}
-                        </select>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 hidden lg:table-cell">
+                        <span className="text-gray-300 text-sm">
+                          {manager ? manager.name : <span className="text-gray-500">Unassigned</span>}
+                        </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 sm:px-6 py-3 sm:py-4">
                         <div className="flex items-center gap-2">
                           {getStatusIcon(client.status)}
-                          <span className="text-gray-300 capitalize">{client.status}</span>
+                          <span className="text-gray-300 capitalize text-sm sm:text-base">{client.status}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <Link
-                          to={`/admin/clients/${client.id}`}
-                          className="text-primary-orange hover:text-orange-400 transition-colors"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </Link>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-1 sm:gap-2">
+                          <button
+                            onClick={() => handleView(client.id)}
+                            className="p-1.5 sm:p-2 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors"
+                            title="View"
+                          >
+                            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleEdit(client)}
+                            className="p-1.5 sm:p-2 text-primary-orange hover:bg-primary-orange/20 rounded-lg transition-colors"
+                            title="Edit"
+                          >
+                            <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          </button>
+                          <button
+                            onClick={() => setDeleteConfirm(client.id)}
+                            className="p-1.5 sm:p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
@@ -160,6 +186,34 @@ export default function ClientList() {
         </div>
       </div>
 
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#2a2a2a] rounded-xl border border-gray-800 w-full max-w-md">
+            <div className="p-6">
+              <h3 className="text-xl font-semibold text-white mb-4">Delete Client</h3>
+              <p className="text-gray-400 mb-6">
+                Are you sure you want to delete this client? This action cannot be undone.
+              </p>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setDeleteConfirm(null)}
+                  className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleDelete(deleteConfirm)}
+                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showModal && (
         <ClientModal
           client={editingClient}
@@ -172,4 +226,5 @@ export default function ClientList() {
     </div>
   )
 }
+
 

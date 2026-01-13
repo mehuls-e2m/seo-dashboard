@@ -12,6 +12,7 @@ import ManagerDashboard from './pages/manager/ManagerDashboard'
 import ClientList from './pages/admin/ClientList'
 import ManagerClientList from './pages/manager/ManagerClientList'
 import AccountManagers from './pages/admin/AccountManagers'
+import ManagerDetails from './pages/admin/ManagerDetails'
 import Settings from './pages/Settings'
 import ClientDashboard from './pages/client/ClientDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -21,7 +22,7 @@ function AppRoutes() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-primary-dark flex items-center justify-center transition-colors">
+      <div className="min-h-screen bg-primary-dark flex items-center justify-center">
         <div className="text-primary-orange text-xl">Loading...</div>
       </div>
     )
@@ -45,6 +46,7 @@ function AppRoutes() {
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="clients" element={<ClientList />} />
               <Route path="managers" element={<AccountManagers />} />
+              <Route path="managers/:managerId" element={<ManagerDetails />} />
               <Route path="settings" element={<Settings />} />
               <Route path="clients/:clientId/*" element={<ClientDashboard />} />
             </Routes>

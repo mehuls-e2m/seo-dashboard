@@ -131,7 +131,7 @@ export default function SearchConsole({ client }) {
         {/* Top Queries */}
         <div className="bg-[#2a2a2a] rounded-xl p-6 border border-gray-800">
           <h2 className="text-xl font-semibold text-white mb-6">Top Queries</h2>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scrollbar-hide">
             <table className="w-full">
               <thead className="bg-[#1a1a1a] border-b border-gray-800">
                 <tr>
@@ -156,7 +156,7 @@ export default function SearchConsole({ client }) {
         {/* Top Pages */}
         <div className="bg-[#2a2a2a] rounded-xl p-6 border border-gray-800">
           <h2 className="text-xl font-semibold text-white mb-6">Top Pages</h2>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scrollbar-hide">
             <table className="w-full">
               <thead className="bg-[#1a1a1a] border-b border-gray-800">
                 <tr>
@@ -181,4 +181,5 @@ export default function SearchConsole({ client }) {
     </div>
   )
 }
+
 

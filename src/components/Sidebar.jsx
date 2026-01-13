@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { useTheme } from '../contexts/ThemeContext'
+import { X } from 'lucide-react'
 import {
   LayoutDashboard,
   Users,
@@ -9,9 +9,8 @@ import {
   Briefcase,
 } from 'lucide-react'
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }) {
   const { user } = useAuth()
-  const { theme } = useTheme()
   const location = useLocation()
 
   const adminMenuItems = [
@@ -30,17 +29,23 @@ export default function Sidebar() {
   const menuItems = user?.role === 'admin' ? adminMenuItems : managerMenuItems
 
   return (
-    <div className="w-64 bg-white dark:bg-[#1f1f1f] border-r border-gray-200 dark:border-gray-800 flex flex-col transition-colors">
-      <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+    <div className="w-full h-full bg-[#1f1f1f] border-r border-gray-800 flex flex-col">
+      <div className="p-4 sm:p-6 border-b border-gray-800 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img
-            src={theme === 'dark' ? '/dark-logo-leadgear.png' : '/light-logo-leadgear.png'}
+            src="/dark-logo-leadgear.png"
             alt="LEADGEAR"
-            className="h-10 w-auto"
+            className="h-8 sm:h-10 w-auto"
           />
         </div>
+        <button
+          onClick={onClose}
+          className="lg:hidden p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-3 sm:p-4 space-y-2">
         {menuItems.map((item) => {
           const Icon = item.icon
           const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/')
@@ -51,7 +56,7 @@ export default function Sidebar() {
               className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                 isActive
                   ? 'bg-primary-orange text-white'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
               }`}
             >
               <Icon className="w-5 h-5" />
