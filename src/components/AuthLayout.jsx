@@ -5,7 +5,7 @@ export default function AuthLayout({ title, subtitle, children }) {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
             <img
-              src="/dark-logo-leadgear.png"
+              src="/light-logo-leadgear.png"
               alt="LEADGEAR"
               className="h-20 w-auto"
             />

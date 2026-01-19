@@ -33,7 +33,7 @@ export default function Sidebar({ onClose }) {
       <div className="p-4 sm:p-6 border-b border-gray-800 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img
-            src="/dark-logo-leadgear.png"
+            src="/light-logo-leadgear.png"
             alt="LEADGEAR"
             className="h-8 sm:h-10 w-auto"
           />
